@@ -1,7 +1,10 @@
 package hu.bme.mit.yakindu.analysis.workhere;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
@@ -13,7 +16,40 @@ import org.yakindu.sct.model.sgraph.Transition;
 import hu.bme.mit.model2gml.Model2GML;
 import hu.bme.mit.yakindu.analysis.modelmanager.ModelManager;
 
+class UniqueNameProvider {
+	private Set<String> names = new HashSet<>();
+	private int id = 0;
+	
+	public void addName(String name) {
+		names.add(name);
+	}
+	
+	public String getUniqueName() {
+		String name = "NamelessState" + id++;
+		
+		while (names.contains(name)) {
+			name = "NamelessState" + id++;
+		}
+		
+		return name;
+	}
+}
+
+class IterableEObject implements Iterable<EObject> {
+	private EObject eobject;
+	
+	public IterableEObject(EObject eobject) {
+		this.eobject = eobject;
+	}
+
+	@Override
+	public Iterator<EObject> iterator() {
+		return eobject.eAllContents();
+	}
+}
+
 public class Main {
+	
 	@Test
 	public void test() {
 		main(new String[0]);
@@ -28,18 +64,40 @@ public class Main {
 		
 		// Reading model
 		Statechart s = (Statechart) root;
-		TreeIterator<EObject> iterator = s.eAllContents();
+
+		IterableEObject iterable = new IterableEObject(s);
 		
 		List<State> trapStates = new ArrayList<>();
+		List<State> namelessStates = new ArrayList<>();
+		UniqueNameProvider provider = new UniqueNameProvider();
 		
-		while (iterator.hasNext()) {
-			EObject content = iterator.next();
+		for (EObject content : iterable) {
+			if(content instanceof State) {
+				State state = (State) content;
+				
+				if (state.getOutgoingTransitions().size() == 0) {
+					trapStates.add(state);
+				}
+				
+				if (state.getName().isEmpty()) {
+					namelessStates.add(state);
+				} else {
+					provider.addName(state.getName());
+				}
+			}
+		}
+		
+		for (EObject content : iterable) {
 			if(content instanceof State) {
 				State state = (State) content;
 				System.out.println(state.getName());
 				
-				if (state.getOutgoingTransitions().size() == 0) {
-					trapStates.add(state);
+				if (state.getName().isEmpty()) {
+					namelessStates.add(state);
+					
+					
+					state.setName(provider.getUniqueName());
+					System.out.println("Nameless state. Suggesting name: " + state.getName());
 				}
 			}
 			if(content instanceof Transition) {
@@ -52,7 +110,7 @@ public class Main {
 		for (State state : trapStates) {
 			System.out.println(state.getName());
 		}
-		
+			
 		// Transforming the model into a graph representation
 		String content = model2gml.transform(root);
 		// and saving it

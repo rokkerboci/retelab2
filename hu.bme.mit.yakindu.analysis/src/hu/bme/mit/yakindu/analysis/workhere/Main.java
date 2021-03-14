@@ -79,7 +79,7 @@ public class Main {
 					trapStates.add(state);
 				}
 				
-				if (state.getName().isEmpty()) {
+				if (state.getName() == null || state.getName().isEmpty()) {
 					namelessStates.add(state);
 				} else {
 					provider.addName(state.getName());
@@ -90,15 +90,21 @@ public class Main {
 		for (EObject content : iterable) {
 			if(content instanceof State) {
 				State state = (State) content;
-				System.out.println(state.getName());
 				
-				if (state.getName().isEmpty()) {
-					namelessStates.add(state);
-					
-					
+				if (state.getName() == null || state.getName().isEmpty()) {
 					state.setName(provider.getUniqueName());
 					System.out.println("Nameless state. Suggesting name: " + state.getName());
 				}
+			}
+		}
+		
+		System.out.println();	
+		
+		for (EObject content : iterable) {
+			if(content instanceof State) {
+				State state = (State) content;
+				
+				System.out.println(state.getName());				
 			}
 			if(content instanceof Transition) {
 				Transition transition = (Transition) content;

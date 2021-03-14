@@ -10,7 +10,6 @@ import org.yakindu.sct.model.sgraph.Statechart;
 import org.yakindu.sct.model.stext.stext.EventDefinition;
 import org.yakindu.sct.model.stext.stext.VariableDefinition;
 
-import hu.bme.mit.model2gml.Model2GML;
 import hu.bme.mit.yakindu.analysis.modelmanager.ModelManager;
 
 class IterableEObject implements Iterable<EObject> {
@@ -112,6 +111,8 @@ public class Main {
 		System.out.println();
 		System.out.println("			running = input != null;");
 		System.out.println("		}");
+		System.out.println();
+		System.out.println("		System.exit(0);");		
 		System.out.println("	}");
 		System.out.println();
 		System.out.println("	public static void print(IExampleStatemachine s) {");
@@ -119,7 +120,7 @@ public class Main {
 			String id = variable.getId();
 			String name = variable.getName();
 			
-			System.out.println("		System.out.println(\"" + id + " = \" + s.getSCInterface().get" + capitalize(name) + "());\"");
+			System.out.println("		System.out.println(\"" + id + " = \" + s.getSCInterface().get" + capitalize(name) + "());");
 		}
 		System.out.println("	}");
 		System.out.println("}");
